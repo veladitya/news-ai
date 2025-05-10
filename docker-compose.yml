@@ -1,0 +1,198 @@
+services:
+
+  kafka-gen:
+    image: confluentinc/cp-kafka:7.3.3
+    hostname: kafka-gen-n1
+    container_name: kafka-gen-n1
+    volumes:
+      - ./scripts/create_cluster_id.sh:/tmp/create_cluster_id.sh
+      - ./clusterID:/tmp/clusterID
+    command: "bash -c '/tmp/create_cluster_id.sh'"
+    networks:
+      - news-network
+
+  kafka1:
+    image: confluentinc/cp-kafka:7.3.3
+    hostname: kafka1-n1
+    container_name: kafka1-n1
+    ports:
+      - "39092:39092"
+    environment:
+      KAFKA_LISTENERS: BROKER://kafka1-n1:19092,EXTERNAL://0.0.0.0:39092,CONTROLLER://kafka1-n1:9093
+      KAFKA_ADVERTISED_LISTENERS: BROKER://kafka1-n1:19092,EXTERNAL://kafka1-n1:39092
+      KAFKA_INTER_BROKER_LISTENER_NAME: BROKER
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,BROKER:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_PROCESS_ROLES: 'controller,broker'
+      KAFKA_NODE_ID: 1
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka1-n1:9093,2@kafka2-n1:9093,3@kafka3-n1:9093'
+      KAFKA_METADATA_LOG_SEGMENT_MS: 15000
+      KAFKA_METADATA_MAX_RETENTION_MS: 1200000
+      KAFKA_METADATA_LOG_MAX_RECORD_BYTES_BETWEEN_SNAPSHOTS: 2800
+      KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+      KAFKA_MIN_INSYNC_REPLICAS: 2
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+      KAFKA_LOG_FLUSH_INTERVAL_MESSAGES: 10000
+      KAFKA_LOG_FLUSH_INTERVAL_MS: 1000
+      KAFKA_LOG_RETENTION_HOURS: 168
+      KAFKA_LOG_SEGMENT_BYTES: 1073741824
+      KAFKA_MESSAGE_MAX_BYTES: 20971520
+      KAFKA_REPLICA_FETCH_MAX_BYTES: 20971520
+    volumes:
+      - ./kafka-cluster/data/kafka1-data:/var/lib/kafka/data
+      - ./scripts/update_run.sh:/tmp/update_run.sh
+      - ./clusterID:/tmp/clusterID
+      - ./scripts/create_topic.sh:/tmp/create_topic.sh
+    command: "bash -c '/tmp/update_run.sh && /etc/confluent/docker/run && sleep 60 && /tmp/create_topic.sh'"
+    networks:
+      - news-network
+
+  kafka2:
+    image: confluentinc/cp-kafka:7.3.3
+    hostname: kafka2-n1
+    container_name: kafka2-n1
+    ports:
+      - "39093:39093"
+    environment:
+      KAFKA_LISTENERS: BROKER://kafka2-n1:19093,EXTERNAL://0.0.0.0:39093,CONTROLLER://kafka2-n1:9093
+      KAFKA_ADVERTISED_LISTENERS: BROKER://kafka2-n1:19093,EXTERNAL://kafka2-n1:39093
+      KAFKA_INTER_BROKER_LISTENER_NAME: BROKER
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,BROKER:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_PROCESS_ROLES: 'controller,broker'
+      KAFKA_NODE_ID: 2
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka1-n1:9093,2@kafka2-n1:9093,3@kafka3-n1:9093'
+      KAFKA_METADATA_LOG_SEGMENT_MS: 15000
+      KAFKA_METADATA_MAX_RETENTION_MS: 1200000
+      KAFKA_METADATA_LOG_MAX_RECORD_BYTES_BETWEEN_SNAPSHOTS: 2800
+      KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+      KAFKA_MIN_INSYNC_REPLICAS: 2
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+      KAFKA_LOG_FLUSH_INTERVAL_MESSAGES: 10000
+      KAFKA_LOG_FLUSH_INTERVAL_MS: 1000
+      KAFKA_LOG_RETENTION_HOURS: 168
+      KAFKA_LOG_SEGMENT_BYTES: 1073741824
+      KAFKA_MESSAGE_MAX_BYTES: 20971520
+      KAFKA_REPLICA_FETCH_MAX_BYTES: 20971520
+    volumes:
+      - ./kafka-cluster/data/kafka2-data:/var/lib/kafka/data
+      - ./scripts/update_run.sh:/tmp/update_run.sh
+      - ./clusterID:/tmp/clusterID
+    command: "bash -c '/tmp/update_run.sh && /etc/confluent/docker/run'"
+    networks:
+      - news-network
+
+  kafka3:
+    image: confluentinc/cp-kafka:7.3.3
+    hostname: kafka3-n1
+    container_name: kafka3-n1
+    ports:
+      - "39094:39094"
+    environment:
+      KAFKA_LISTENERS: BROKER://kafka3-n1:19094,EXTERNAL://0.0.0.0:39094,CONTROLLER://kafka3-n1:9093
+      KAFKA_ADVERTISED_LISTENERS: BROKER://kafka3-n1:19094,EXTERNAL://kafka3-n1:39094
+      KAFKA_INTER_BROKER_LISTENER_NAME: BROKER
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,BROKER:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_PROCESS_ROLES: 'controller,broker'
+      KAFKA_NODE_ID: 3
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka1-n1:9093,2@kafka2-n1:9093,3@kafka3-n1:9093'
+      KAFKA_METADATA_LOG_SEGMENT_MS: 15000
+      KAFKA_METADATA_MAX_RETENTION_MS: 1200000
+      KAFKA_METADATA_LOG_MAX_RECORD_BYTES_BETWEEN_SNAPSHOTS: 2800
+      KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+      KAFKA_MIN_INSYNC_REPLICAS: 2
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+      KAFKA_LOG_FLUSH_INTERVAL_MESSAGES: 10000
+      KAFKA_LOG_FLUSH_INTERVAL_MS: 1000
+      KAFKA_LOG_RETENTION_HOURS: 168
+      KAFKA_LOG_SEGMENT_BYTES: 1073741824
+      KAFKA_MESSAGE_MAX_BYTES: 20971520
+      KAFKA_REPLICA_FETCH_MAX_BYTES: 20971520
+    volumes:
+      - ./kafka-cluster/data/kafka3-data:/var/lib/kafka/data
+      - ./scripts/update_run.sh:/tmp/update_run.sh
+      - ./clusterID:/tmp/clusterID
+    command: "bash -c '/tmp/update_run.sh && /etc/confluent/docker/run'"
+    networks:
+      - news-network
+
+  redis:
+    image: redis:7.0.15-alpine
+    restart: always
+    container_name: redis-server
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis-cluster/data:/root/redis
+    command: ["redis-server", "--appendonly", "yes"]
+    networks:
+      - news-network
+
+  rss-producer:
+    build:
+      context: ./rss-producer
+      dockerfile: Dockerfile
+    container_name: rss-producer
+    ports:
+      - "6080:6080"
+    environment:
+      - KAFKA_BROKER=kafka1-n1:39092,kafka2-n1:39093,kafka3-n1:39094
+    depends_on:
+      - kafka1
+      - kafka2
+      - kafka3
+    networks:
+      - news-network
+
+  news-consumer:
+    build:
+      context: ./news-consumer
+      dockerfile: Dockerfile
+    container_name: news-consumer
+    ports:
+      - "7080:7080"
+    environment:
+      - REDIS_HOST=redis-server
+      - REDIS_PORT=6379
+      - KAFKA_BROKER=kafka1-n1:39092,kafka2-n1:39093,kafka3-n1:39094
+    depends_on:
+      - redis
+      - kafka1
+      - kafka2
+      - kafka3
+    networks:
+      - news-network
+
+  news-api:
+    build:
+      context: ./news-api
+      dockerfile: Dockerfile
+    container_name: news-api
+    ports:
+      - "8080:8080"
+    environment:
+      - REDIS_HOST=redis-server
+      - REDIS_PORT=6379
+    depends_on:
+      - redis
+      - news-consumer
+    networks:
+      - news-network
+
+
+networks:
+  news-network:
+    driver: bridge
