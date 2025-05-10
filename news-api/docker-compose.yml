@@ -1,0 +1,29 @@
+version: '3.9'
+services:
+  redis:
+    image: redis:7.0.15-alpine
+    container_name: redis-server
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+    networks:
+      - news-network
+
+  news-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: news-api
+    ports:
+      - "8080:8080"
+    environment:
+      - REDIS_HOST=redis-server
+      - REDIS_PORT=6379
+    depends_on:
+      - redis
+    networks:
+      - news-network
+
+networks:
+  news-network:
+    driver: bridge
