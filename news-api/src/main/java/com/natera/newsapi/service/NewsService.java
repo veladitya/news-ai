@@ -3,11 +3,13 @@ package com.natera.newsapi.service;
 import com.natera.newsapi.models.News;
 import com.natera.newsapi.respoistory.NewsRepository;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class NewsService {
@@ -27,7 +29,12 @@ public class NewsService {
         }
 
         PageRequest pageRequest = PageRequest.of(page, size, sort);
-        return newsRepository.findAll(pageRequest);
+        Page<News> newsPage = newsRepository.findAll(pageRequest);
+        List<News> filteredNews = newsPage.getContent()
+                .stream()
+                .filter(Objects::nonNull)
+                .toList();
+        return new PageImpl<>(filteredNews, pageRequest, filteredNews.size());
     }
 }
 

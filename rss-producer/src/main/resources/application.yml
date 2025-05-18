@@ -26,12 +26,6 @@ spring:
     template:
       default-topic: nyt.rss.articles
 
-    consumer:
-      # Isolation level to only read committed messages
-      isolation-level: read_committed
-      group-id: rss-consumer-group
-      enable-auto-commit: false
-
 # Polling interval set to 5 minutes (300000 ms)
 rss:
   url: https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml
